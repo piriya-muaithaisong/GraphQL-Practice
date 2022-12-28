@@ -20,14 +20,23 @@ const COLLECTIONS = gql`
       }
     }
   }
-`
-
+`;
 
 export const CategoriesProvider = ({ children }) => {
   const [categoriesMap, setCategoriesMap] = useState({});
-  const {loading, error, data} = useQuery(COLLECTIONS);
+  const { loading, error, data } = useQuery(COLLECTIONS);
 
-  
+  useEffect(() => {
+    if (data) {
+      const { collections } = data;
+      const collectionsMap = collections.reduce((acc, collection) => {
+        const { title, items } = collection;
+        acc[title.toLowerCase()] = items;
+        return acc;
+      }, {});
+      setCategoriesMap(collectionsMap);
+    }
+  }, [data]);
 
   // useEffect(() => {
   //   const getCategoriesMap = async () => {
@@ -38,7 +47,7 @@ export const CategoriesProvider = ({ children }) => {
   //   getCategoriesMap();
   // }, []);
 
-  const value = { categoriesMap };
+  const value = { categoriesMap, loading };
   return (
     <CategoriesContext.Provider value={value}>
       {children}
